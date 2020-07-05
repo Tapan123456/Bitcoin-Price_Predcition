@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Trial</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+  <link rel="stylesheet" href="dl1.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+</head>
+
+<body>
+  <div class="graph mt-5">
+    <h1 class="heading d-flex justify-content-center">
+      Bitcon Prices
+    </h1>
+
+    <input type="checkbox" id="switch" name="theme" /><label for="switch">Toggle</label>
+
+    <canvas id="myChart" class="row mt-3 col-lg-8 mx-auto"></canvas>
+    <!-- <div class="row mt-3">
+        <div class="col-lg-8 mx-auto">
+          <canvas id="myChart"></canvas>
+        </div>
+      </div>  -->
+  </div>
+
+  <!-- <div class="graph mx-auto" style="height: 40rem;">
+      <div class="row">
+        <div class="col-lg-8">
+          <h1 class="heading d-flex justify-content-center">
+            Bitcon Prices
+          </h1>
+
+          <div class="toggle-container">
+            <input type="checkbox" id="switch" name="theme" /><label
+              for="switch"
+              >Toggle</label
+            >
+          </div>
+
+          <canvas class="center" id="myChart" style="height: 10rem;"></canvas>
+        </div>
+      </div>
+    </div> -->
+
+  <script>
+    window.addEventListener("load", setup);
+
+    async function setup() {
+      const ctx = document.getElementById("myChart").getContext("2d");
+      const globalPrices = await getData();
+      const myChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: globalPrices.years,
+          datasets: [{
+              label: "Actual Prices in $",
+              data: globalPrices.aprices,
+              fill: false,
+              borderColor: "rgba(255, 99, 132, 1)",
+              backgroundColor: "rgba(255, 99, 132, 0.5)",
+              borderWidth: 1,
+              scaleOverride: true,
+              scaleSteps: 14,
+              scaleStepWidth: 100,
+              scaleStartValue: 9000
+            },
+
+            {
+              label: "Predicted Prices in $",
+              data: globalPrices.pprices,
+              fill: false,
+              borderColor: "rgba(99, 132, 255, 1)",
+              backgroundColor: "rgba(99, 132, 255, 0.5)",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          elements: {
+            point: {
+              radius: 5,
+            },
+          },
+
+          scales: {
+            xAxes: [{
+              scaleLabel: {
+                display: true,
+                labelString: "Dates(YYYY-MM-DD)",
+              },
+            }, ],
+
+            yAxes: [{
+              scaleLabel: {
+                display: true,
+                labelString: "Prices(in $)",
+              },
+            }, ],
+          },
+        },
+      });
+    }
+
+    async function getData() {
+      const response = await fetch("input_to_chart.csv");
+      const data = await response.text();
+      const years = [];
+      const aprices = [];
+      const pprices = [];
+      const rows = data.split("\n").slice(1);
+      rows.forEach((row) => {
+        const cols = row.split(",");
+        years.push(cols[1]);
+        aprices.push(cols[3]);
+        pprices.push(cols[2]);
+      });
+      return {
+        years,
+        aprices,
+        pprices
+      };
+    }
+  </script>
+
+  <script>
+    var checkbox = document.querySelector("input[name=theme]");
+
+    checkbox.addEventListener("change", function () {
+      if (this.checked) {
+        trans();
+        document.documentElement.setAttribute("data-theme", "dark");
+      } else {
+        trans();
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    });
+
+    let trans = () => {
+      document.documentElement.classList.add("transition");
+      window.setTimeout(() => {
+        document.documentElement.classList.remove("transition");
+      }, 1000);
+    };
+  </script>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous">
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous">
+  </script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
+  </script>
+</body>
+
+</html>

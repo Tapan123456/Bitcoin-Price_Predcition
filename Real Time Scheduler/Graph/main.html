@@ -1,0 +1,160 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bitcoin Price Prediction</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <link rel="stylesheet" href="trial.css" />
+    <link rel="stylesheet" href="tool.css" />
+    <link rel="shortcut icon" type="image/png" href="/bitcoin.png" />
+  </head>
+  <body>
+    <nav>
+      <div class="tooltip">
+        <div class="theme-switch-wrapper">
+          <label class="theme-switch" for="checkbox">
+            <input type="checkbox" id="checkbox" />
+            <div class="slider round"></div>
+          </label>
+          <!-- <em id="tog">Light mode enabled!</em> -->
+        </div>
+        <span class="tooltiptext" id="tog"></span>
+      </div>
+    </nav>
+
+    <section>
+      <img
+        src="logo.png"
+        style="
+          width: 4rem;
+          height: 4rem;
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
+        "
+      />
+      <h1 style="text-align: center;">
+        Bitcoin Prices
+      </h1>
+      <canvas id="myChart" style="margin-top: 1rem;"></canvas>
+    </section>
+
+    <script>
+      window.addEventListener("load", setup);
+
+      async function setup() {
+        const ctx = document.getElementById("myChart").getContext("2d");
+        const globalPrices = await getData();
+        const myChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: globalPrices.years,
+            datasets: [
+              {
+                label: "Actual Prices in $",
+                data: globalPrices.aprices,
+                fill: false,
+                borderColor: "rgba(255, 99, 132, 1)",
+                backgroundColor: "rgba(255, 99, 132, 0.5)",
+                borderWidth: 1,
+              },
+
+              {
+                label: "Predicted Prices in $",
+                data: globalPrices.pprices,
+                fill: false,
+                borderColor: "rgba(99, 132, 255, 1)",
+                backgroundColor: "rgba(99, 132, 255, 0.5)",
+                borderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            // elements: {
+            //   point: {
+            //     radius: 0,
+            //   },
+            // },
+
+            legend: {
+              labels: {
+                fontColor: "grey",
+              },
+            },
+
+            scales: {
+              xAxes: [
+                {
+                  gridLines: { color: "rgba(0, 0, 0, 0)" },
+                  scaleLabel: {
+                    display: true,
+                    labelString: "Dates(DD-MM-YYYY)",
+                  },
+                },
+              ],
+
+              yAxes: [
+                {
+                  gridLines: { color: "#DCDCDC" },
+                  scaleLabel: {
+                    display: true,
+                    labelString: "Prices($)",
+                  },
+                },
+              ],
+            },
+          },
+        });
+      }
+
+      async function getData() {
+        const response = await fetch("input_to_chart.csv");
+        const data = await response.text();
+        const years = [];
+        const aprices = [];
+        const pprices = [];
+        const rows = data.split("\n").slice(1);
+        rows.forEach((row) => {
+          const cols = row.split(",");
+          years.push(cols[1]);
+          aprices.push(cols[3]);
+          pprices.push(cols[2]);
+        });
+        return { years, aprices, pprices };
+      }
+
+      setInterval(getData, 30000);
+    </script>
+
+    <script>
+      const toggleSwitch = document.querySelector(
+        '.theme-switch input[type="checkbox"]'
+      );
+      const currentTheme = localStorage.getItem("theme");
+
+      if (currentTheme) {
+        document.documentElement.setAttribute("data-theme", currentTheme);
+
+        if (currentTheme === "dark") {
+          toggleSwitch.checked = true;
+        }
+      }
+
+      function switchTheme(e) {
+        if (e.target.checked) {
+          document.documentElement.setAttribute("data-theme", "dark");
+          localStorage.setItem("theme", "dark");
+          document.getElementById("tog").innerHTML = "dark mode on";
+          document.getElementById("tog").style.color = "white";
+        } else {
+          document.documentElement.setAttribute("data-theme", "light");
+          localStorage.setItem("theme", "light");
+          document.getElementById("tog").innerHTML = "light mode on";
+          document.getElementById("tog").style.color = "black";
+        }
+      }
+
+      toggleSwitch.addEventListener("change", switchTheme, false);
+    </script>
+  </body>
+</html>
